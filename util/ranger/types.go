@@ -99,7 +99,7 @@ func (ran *Range) IsPoint(sc *stmtctx.StatementContext) bool {
 		}
 
 		if a.IsNull() {
-			return false
+			return true
 		}
 	}
 	return !ran.LowExclude && !ran.HighExclude

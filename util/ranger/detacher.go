@@ -119,6 +119,15 @@ func getPotentialEqOrInColOffset(expr expression.Expression, cols []*expression.
 			offset = curOffset
 		}
 		return offset
+	case ast.IsNull:
+		if c, ok := f.GetArgs()[0].(*expression.Column); ok {
+			for i, col := range cols {
+				// When cols are a generated expression col, compare them in terms of virtual expr.
+				if col.EqualByExprAndID(nil, c) {
+					return i
+				}
+			}
+		}
 	case ast.EQ, ast.NullEQ, ast.LE, ast.GE, ast.LT, ast.GT:
 		if c, ok := f.GetArgs()[0].(*expression.Column); ok {
 			if c.RetType.EvalType() == types.ETString && !collate.CompatibleCollate(c.RetType.Collate, collation) {
@@ -473,7 +482,7 @@ func allEqOrIn(expr expression.Expression) bool {
 			}
 		}
 		return true
-	case ast.EQ, ast.NullEQ, ast.In:
+	case ast.EQ, ast.NullEQ, ast.In, ast.IsNull:
 		return true
 	}
 	return false
