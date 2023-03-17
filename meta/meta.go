@@ -32,6 +32,7 @@ import (
 	"github.com/pingcap/tidb/metrics"
 	"github.com/pingcap/tidb/parser/model"
 	"github.com/pingcap/tidb/parser/mysql"
+	"github.com/pingcap/tidb/store/helper"
 	"github.com/pingcap/tidb/structure"
 	"github.com/pingcap/tidb/util/dbterror"
 	"github.com/pingcap/tidb/util/logutil"
@@ -409,16 +410,17 @@ func (m *Meta) GetSchemaVersionWithNonEmptyDiff() (int64, error) {
 	return v, err
 }
 
-// Returns the timestamp of a schema version
-func (m *Meta) GetTimestampForSchemaVersion(version int64) (int64, error) {
-	key := m.schemaTimestampKey(version)
-	return m.txn.GetInt64(key)
-}
-
-// Set the timestamp for a specific schema version
-func (m *Meta) SetTimestampForSchemaVersion(ts, version int64) error {
-	key := m.schemaTimestampKey(version)
-	return m.txn.Set(key, []byte(strconv.FormatInt(ts, 10)))
+// Returns the timestamp of a schema version, which is the commit timestamp of the schema diff
+func (m *Meta) GetTimestampForSchemaVersion(helper *helper.Helper, version int64) (int64, error) {
+	diffKey := m.schemaDiffKey(version)
+	data, err := helper.GetMvccByEncodedKey(m.txn.EncodeStringDataKey(diffKey))
+	if err != nil {
+		return 0, err
+	}
+	if len(data.Info.Writes) == 0 {
+		return 0, errors.Errorf("There is no Write MVCC info for the schema version")
+	}
+	return int64(data.Info.Writes[0].CommitTs), nil
 }
 
 // GetSchemaVersion gets current global schema version.
@@ -1502,10 +1504,6 @@ func getReorgJobFieldHandle(t *structure.TxStructure, reorgJobField []byte) (kv.
 
 func (*Meta) schemaDiffKey(schemaVersion int64) []byte {
 	return []byte(fmt.Sprintf("%s:%d", mSchemaDiffPrefix, schemaVersion))
-}
-
-func (*Meta) schemaTimestampKey(version int64) []byte {
-	return []byte(fmt.Sprintf("%s:%d", mSchemaTimestampPrefix, version))
 }
 
 // GetSchemaDiff gets the modification information on a given schema version.
