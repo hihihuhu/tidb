@@ -1070,6 +1070,9 @@ type SessionVars struct {
 	// See https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_max_execution_time
 	MaxExecutionTime uint64
 
+	// TidbKvReadTimeout is the timeout for readonly kv request in milliseconds, 0 means no timeout
+	TidbKvReadTimeout uint64
+
 	// Killed is a flag to indicate that this query is killed.
 	Killed uint32
 
@@ -3600,4 +3603,12 @@ func RuntimeFilterModeStringToMode(name string) (RuntimeFilterMode, bool) {
 	default:
 		return -1, false
 	}
+}
+
+// Returns readonly kv request timeout, prefer query hint over session variable
+func (s *SessionVars) GetTidbKvReadTimeout() uint64 {
+	if s.StmtCtx.HasTidbKvReadTimeout {
+		return s.StmtCtx.TidbKvReadTimeout
+	}
+	return s.TidbKvReadTimeout
 }

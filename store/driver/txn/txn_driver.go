@@ -279,6 +279,9 @@ func (txn *tikvTxn) SetOption(opt int, val interface{}) {
 		txn.KVTxn.SetResourceGroupName(val.(string))
 	case kv.LoadBasedReplicaReadThreshold:
 		txn.KVTxn.GetSnapshot().SetLoadBasedReplicaReadThreshold(val.(time.Duration))
+	case kv.TidbKvReadTimeout:
+		// TODO set the value to KVSnapshot
+		// s.KVSnapshot.SetTidbKvReadTimeout(val.(uint64))
 	}
 }
 

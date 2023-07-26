@@ -140,6 +140,9 @@ func (s *tikvSnapshot) SetOption(opt int, val interface{}) {
 		s.KVSnapshot.SetResourceGroupName(val.(string))
 	case kv.LoadBasedReplicaReadThreshold:
 		s.KVSnapshot.SetLoadBasedReplicaReadThreshold(val.(time.Duration))
+	case kv.TidbKvReadTimeout:
+		// TODO set the value to KVSnapshot
+		// s.KVSnapshot.SetTidbKvReadTimeout(val.(uint64))
 	}
 }
 
