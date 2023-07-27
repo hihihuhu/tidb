@@ -59,28 +59,26 @@ var (
 //
 
 var (
-	mMetaPrefix            = []byte("m")
-	mNextGlobalIDKey       = []byte("NextGlobalID")
-	mSchemaVersionKey      = []byte("SchemaVersionKey")
-	mDBs                   = []byte("DBs")
-	mDBPrefix              = "DB"
-	mTablePrefix           = "Table"
-	mSequencePrefix        = "SID"
-	mSeqCyclePrefix        = "SequenceCycle"
-	mTableIDPrefix         = "TID"
-	mIncIDPrefix           = "IID"
-	mRandomIDPrefix        = "TARID"
-	mBootstrapKey          = []byte("BootstrapKey")
-	mSchemaDiffPrefix      = "Diff"
-	mPolicies              = []byte("Policies")
-	mPolicyPrefix          = "Policy"
-	mResourceGroups        = []byte("ResourceGroups")
-	mResourceGroupPrefix   = "RG"
-	mPolicyGlobalID        = []byte("PolicyGlobalID")
-	mPolicyMagicByte       = CurrentMagicByteVer
-	mDDLTableVersion       = []byte("DDLTableVersion")
-	mMetaDataLock          = []byte("metadataLock")
-	mSchemaTimestampPrefix = "SchemaTimestamp"
+	mMetaPrefix       = []byte("m")
+	mNextGlobalIDKey  = []byte("NextGlobalID")
+	mSchemaVersionKey = []byte("SchemaVersionKey")
+	mDBs              = []byte("DBs")
+	mDBPrefix         = "DB"
+	mTablePrefix      = "Table"
+	mSequencePrefix   = "SID"
+	mSeqCyclePrefix   = "SequenceCycle"
+	mTableIDPrefix    = "TID"
+	mIncIDPrefix      = "IID"
+	mRandomIDPrefix   = "TARID"
+	mBootstrapKey     = []byte("BootstrapKey")
+	mSchemaDiffPrefix = "Diff"
+	mPolicies         = []byte("Policies")
+	mPolicyPrefix     = "Policy"
+	mPolicyGlobalID   = []byte("PolicyGlobalID")
+	mPolicyMagicByte  = CurrentMagicByteVer
+	mDDLTableVersion  = []byte("DDLTableVersion")
+	mConcurrentDDL    = []byte("concurrentDDL")
+	mMetaDataLock     = []byte("metadataLock")
 )
 
 const (
@@ -406,12 +404,6 @@ func (m *Meta) GetSchemaVersionWithNonEmptyDiff() (int64, error) {
 		v--
 	}
 	return v, err
-}
-
-// EncodeSchemaDiffKey returns the raw kv key for a schema diff
-func (m *Meta) EncodeSchemaDiffKey(schemaVersion int64) kv.Key {
-	diffKey := m.schemaDiffKey(schemaVersion)
-	return m.txn.EncodeStringDataKey(diffKey)
 }
 
 // GetSchemaVersion gets current global schema version.
