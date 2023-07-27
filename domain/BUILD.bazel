@@ -47,7 +47,6 @@ go_library(
         "//sessionctx/variable",
         "//statistics",
         "//statistics/handle",
-        "//store/helper",
         "//telemetry",
         "//ttl/ttlworker",
         "//types",
